@@ -243,7 +243,6 @@ REG_EXPRESION procesarCte (void){
 
 REG_EXPRESION procesarId(void){
     REG_EXPRESION t;
-    chequear(buffer);
     t.clase = ID;
     strcpy(t.nombre, buffer);
     return t;
@@ -377,6 +376,7 @@ TOKEN scanner()
                 } else {
                     printf("Identificador \t   %s \n", buffer);
                     colocar(buffer);
+                    chequear(buffer;
                     return ID;
                 }
         case 4: ungetc(caracter, archivoInicial);
