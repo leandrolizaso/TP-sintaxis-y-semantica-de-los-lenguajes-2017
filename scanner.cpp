@@ -3,110 +3,110 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
- 
+
 #include "micro.h"
- 
+
 using namespace std;
- 
- 
+
+
 struct REG_OPERACION{
     int valor;
 } ;
- 
+
 struct REG_EXPRESION{
     char nombre[32];
     TOKEN clase;
 };
- 
+
 struct tabla{
     string id;
- 
+    TOKEN t;  //esto lo vi en el libro
+
 };
- 
+
 tabla TS[500];
 int indice = 0;
-// bool flagToken = 1;   -> ya no es necesario
 TOKEN tokenActual;
- 
+
 FILE *archivoInicial;
- 
+
 FILE *archivoMV;  //NUEVO
- 
+
 /* FUNCIONES QUE FALTAN DEFINIR */
- 
+
 void genInfijo(); //pagina 54, esta escrita más abajo pero sin definir
- 
+
 /* ---------------------------  */
- 
- 
+
+
 int stringANumero(string numero){
     int numero;
     char str[20];
- 
+
     strcpy(str, numero);
     numero = atoi(str);
- 
+
     return numero;
 }
- 
- 
+
+
 REG_EXPRESION sumar(REG_EXPRESION izquierda, REG_OPERACION operando,REG_EXPRESION derecha){
     //pagina 51 -> explicacion
     REG_EXPRESION resultado;
- 
+
     numeroIzq = stringANumero(extraer(izquierda));
     numeroDer = stringANumero(extraer(derecha));
- 
+
     if (operando.valor == +){
         resultado = numeroIzq + numeroDer
     }else resultado = numeroIzq - numeroDer
- 
+
     return resultado;
 }
- 
- 
+
+
 void generar(string string1, string string2, string string3, string string4){
- 
+
     fwrite (string1, sizeof(string), 1, archivoMV);
     fwrite (string2, sizeof(string), 1, archivoMV);
     fwrite (string3, sizeof(string), 1, archivoMV);
     fwrite (string4, sizeof(string), 1, archivoMV);
     fwrite ("\n", sizeof(char), 1, archivoMV);
 }
- 
- 
+
+
 void comenzar(){
- 
+
     archivoMV = fopen("textoFinal.txt","w");
- 
+
     fwrite ("INICIO",1, sizeof("INICIO"), archivoMV);
 }
- 
- 
+
+
 void terminar(){
- 
+
     fwrite ("FIN",1, sizeof("FIN"), archivoMV);
- 
+
     fclose(archivoMV);
 }
- 
+
 /* AGREGADO ERCI */
- 
- 
+
+
 void objetivo(void){
- 
+
     programa();
     match(FDT);
     terminar();     //NUEVO
 }
- 
+
 void programa(void){
     match(INICIO);
     comenzar();  //NUEVO
     void listaSentencias();
     match(FIN);
 }
- 
+
 void sentencia(TOKEN tok){
     switch(tok){
         case ID:
@@ -126,13 +126,13 @@ void sentencia(TOKEN tok){
             match(PARENDERECHO);
             match(PUNTOYCOMA);
             break;
- 
+
         default:
             errorSintactico(tok);
             break;
     }
 }
- 
+
 void listaSentencias(void){
     proximoToken();
     while(1){
@@ -145,12 +145,12 @@ void listaSentencias(void){
         }
     }
 }
- 
+
 void identificador(tabla *id){
     match(ID);
     *id = procesarId();
 }
- 
+
 void listaIdentificadores(void){
     REG_EXPRESION registro;
     identificador(&registro);
@@ -162,7 +162,7 @@ void listaIdentificadores(void){
         proximoToken();
     }
 }
- 
+
 void primaria(REG_EXPRESION *operando){
     proximoToken();
     switch(tokenActual){
@@ -181,24 +181,28 @@ void primaria(REG_EXPRESION *operando){
         break;
     }
 }
- 
+
 void expresion(REG_EXPRESION *resultado){
     REG_EXPRESION operandoIzq, operandoDer;
     REG_OPERACION op;
-    TOKEN t;
+    proximoToken();
     primaria(&operandoIzq); // <- aparece de la nada?
-    for (t = proximoToken(); t == SUMA || t == RESTA; t = proximoToken()){
+    while (tokenActual == SUMA || tokenActual == RESTA){
         operadorAditivo(&op);
         primaria(&operandoDer);
         //cuando se detecta que el operandoDerecho es primaria, se crea un registro semantico
         //aca es donde se crean temporales creo?
- 
+
+        //Creo que lo hace genInfijo eso
+
         operandoIzq = genInfijo(operandoIzq, op, operandoDer);
+    proximoToken()
+
     }
- 
+
     *resultado = operandoIzq;
 }
- 
+
 void listaExpresiones(){
     REG_EXPRESION registro;
     expresion(&registro);
@@ -209,34 +213,34 @@ void listaExpresiones(){
         proximoToken();
     }
 }
- 
+
 REG_EXPRESION genInfijo(REG_EXPRESION e1, REG_OPERACION op, REG_EXPRESION e2){
- 
+
 }
- 
+
 void operadorAditivo(){
-    TOKEN t = proximoToken();
-    if(t == SUMA || t == RESTA)
+    proximoToken();
+    if(tokenActual == SUMA || tokenActual == RESTA)
         match(t);
     else
         errorSintactico(t);
 }
- 
+
 void Leer(REG_EXPRESION in){
     generar("Read", in.nombre, "Entera", "");
 }
- 
+
 void Escribir(REG_EXPRESION out){
     generar("Write", extraer(out), "Entera", "");
 }
- 
+
 REG_EXPRESION procesarCte (void){
     REG_EXPRESION t;
     t.clase = CONSTANTE;
     scanf(buffer, "%d", &t.valor);
     return t
 }
- 
+
 REG_EXPRESION procesarId(void){
     REG_EXPRESION t;
     chequear(buffer);
@@ -244,30 +248,30 @@ REG_EXPRESION procesarId(void){
     strcpy(t.nombre, buffer);
     return t;
 }
- 
+
 char *extraer(REG_EXPRESION *registro){
     return registro->nombre;
 }
- 
+
 void terminar(void){
     generar("Detiene", "", "", "");
 }
- 
+
 void asignar(REG_EXPRESION izquierda, REG_EXPRESION derecha){
     generar("Almacena", extraer(derecha), izquierda.nombre, "");
 }
- 
- 
+
+
 void match(TOKEN tokenEsperado){
     proximoToken();
- 
+
     if (tokenEsperado != tokenActual){
         //flagToken = 0;
         errorLexico();
     }
     //flagToken = 1;
 }
- 
+
 void proximoToken(){
         tokenActual = scanner();
         switch(tokenActual){
@@ -276,17 +280,17 @@ void proximoToken(){
         }
     return;
 }
- 
+
 char buffer[100];
- 
+
 void agregarCaracter(int c, int i){
     buffer[i] = c;
 }
- 
+
 void vaciarBuffer(){  //limpiarBuffer
     memset(buffer, '\0', sizeof(buffer));
 }
- 
+
 int columna(char a)
 {
   if(isalpha(a)) return 0;
@@ -303,7 +307,7 @@ int columna(char a)
   if(isspace(a)) return 11;
   return 12;
 }
- 
+
 bool esEstadoFinal(int estado){
     return  estado == 2 ||
             estado == 4 ||
@@ -316,11 +320,11 @@ bool esEstadoFinal(int estado){
             estado == 12 ||
             estado == 13;
 }
- 
+
 bool esReservada(char palabra[]){
     return !strcmp(palabra, "inicio") || !strcmp(palabra, "fin") || !strcmp(palabra, "leer") || !strcmp(palabra, "escribir") ;
 }
- 
+
 TOKEN scanner()
 {
     static int mat[15][13] = {{1,3,5,6,7,8,9,10,11,14,13,0,14}, //Estado 0
@@ -339,12 +343,12 @@ TOKEN scanner()
                             {99,99,99,99,99,99,99,99,99,99,99,99,99}, //Estado 13
                             {99,99,99,99,99,99,99,99,99,99,99,99,99} //Estado 14
                             };
- 
+
     int i=0;
     int estado=0;
     char caracter;
- 
- 
+
+
     while (!feof(archivoInicial) && estado!=14 && estado!=99 && !esEstadoFinal(estado))
     {
         caracter = getc(archivoInicial);
@@ -355,21 +359,21 @@ TOKEN scanner()
             agregarCaracter(caracter, i);
             i++;
         }
- 
+
     }
- 
+
     switch(estado){
- 
+
         case 2: ungetc(caracter, archivoInicial);
                 if(esReservada(buffer)){
                     printf("Palabra reservada \t   %s \n", buffer);
- 
+
                     if(strcmp(buffer, "inicio")) return INICIO;
                     if(strcmp(buffer, "fin")) return FIN;
                     if(strcmp(buffer, "leer")) return LEER;
                     if(strcmp(buffer, "escribir")) return ESCRIBIR;
- 
- 
+
+
                 } else {
                     printf("Identificador \t   %s \n", buffer);
                     colocar(buffer);
@@ -386,16 +390,16 @@ TOKEN scanner()
         case 12: printf("Operador \t   %s \n", buffer); return ASIGNACION;
         case 13: return FDT;
         case 14: printf("Error Lexico\n");
- 
+
     }
- 
- 
+
+
 }
- 
+
 void inicializarTabla(){
     memset(ts, 0 ,500)
  }
- 
+
 void buscar(string nuevoId){
     for(int i=0,i=<indice, i++){
         if(ts[indice]==nuevoId){
@@ -404,44 +408,45 @@ void buscar(string nuevoId){
     }
     return false;
 }
- 
+
 void colocar(string nuevoId){
     //if (!buscar(nuevoId)){  -> se hace en chequear
-        ts[indice] = nuevoId;
+        ts.t[indice] = ID   //estara bien esto? entendi que pasaba esto en la pagina 40
+        ts.id[indice] = nuevoId;
         indice++;
     //}
- 
+
     return;
 }
- 
+
 void chequear(string s){
     if(!buscar(s)){
         colocar(s);
         generar("Declara", s, "Entera", "");
     }
 }
- 
+
 void errorSintactico(){
     printf("Error sintactico\n");
- 
+
     fwrite ("Error sintactico\n", sizeof(string), 1, archivoMV);
 }
- 
+
 void errorLexico(){
     printf("Error Lexico\n");
- 
+
     fwrite ("Error Lexico\n", sizeof(string), 1, archivoMV);
 }
- 
+
 int main()
 {
     inicializarTabla();
- 
+
     archivoInicial = fopen("texto.txt","r");
- 
+
     objetivo();
- 
+
     fclose(archivoInicial);
- 
+
     return 0;
 }
