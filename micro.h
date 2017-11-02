@@ -5,6 +5,8 @@ typedef enum {
     INICIO, FIN, LEER, ESCRIBIR, ID, CONSTANTE, PARENIZQUIERDO, PARENDERECHO, PUNTOYCOMA, COMA, ASIGNACION, SUMA, RESTA, FDT
 } TOKEN;
 
+//faltan agregar todos los prototipos xd
+
 void match(TOKEN a);
 void programa(void);
 void listaSentencias(void);
