@@ -10,7 +10,7 @@ using namespace std;
 
 
 struct REG_OPERACION{
-    int valor;
+    char valor;
 } ;
 
 struct REG_EXPRESION{
@@ -26,6 +26,7 @@ struct tabla{
 
 tabla TS[500];
 int indice = 0;
+int cantTemp = 1;
 TOKEN tokenActual;
 
 FILE *archivoInicial;
@@ -216,6 +217,18 @@ void listaExpresiones(){
 
 REG_EXPRESION genInfijo(REG_EXPRESION e1, REG_OPERACION op, REG_EXPRESION e2){
 
+    REG_EXPRESION registro;
+    string opStr;
+    string temp = "temp";
+
+    if(op.valor== '+')strcpy(opStr, "Sumar");
+    if(op.valor== '-')strcpy(opStr, "Restar");
+    strcat(temp, cantTemp)
+    generar(opStr, Extraer(&e1), Extraer(&e2),temp);
+
+    strcpy(registro.nombre,temp);
+    cantTemp++;
+    return registro;
 }
 
 void operadorAditivo(){
