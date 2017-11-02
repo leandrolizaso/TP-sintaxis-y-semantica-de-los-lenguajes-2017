@@ -1,46 +1,30 @@
 #include <iostream>
-#include <string.h>
+//#include <String.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-
+#include <string.h>
 #include "micro.h"
 
 using namespace std;
 
 
-struct REG_OPERACION{
-    char valor;
-} ;
-
-struct REG_EXPRESION{
-    char nombre[32];
-    TOKEN clase;
-};
-
-struct tabla{
-    string id;
-    TOKEN t;  //esto lo vi en el libro
-
-};
 
 tabla TS[500];
 int indice = 0;
 int cantTemp = 1;
 TOKEN tokenActual;
+char buffer[100];
+
 
 FILE *archivoInicial;
 
-FILE *archivoMV;  //NUEVO
-
-/* FUNCIONES QUE FALTAN DEFINIR */
-
-void genInfijo(); //pagina 54, esta escrita más abajo pero sin definir
+FILE *archivoMV;
 
 /* ---------------------------  */
 
 
-int stringANumero(string numero){
+int StringANumero(String numero){
     int numero;
     char str[20];
 
@@ -55,10 +39,13 @@ REG_EXPRESION sumar(REG_EXPRESION izquierda, REG_OPERACION operando,REG_EXPRESIO
     //pagina 51 -> explicacion
     REG_EXPRESION resultado;
 
-    numeroIzq = stringANumero(extraer(izquierda));
-    numeroDer = stringANumero(extraer(derecha));
+    int numeroIzq;
+    int numeroDer;
 
-    if (operando.valor == +){
+    numeroIzq = StringANumero(extraer(izquierda));
+    numeroDer = StringANumero(extraer(derecha));
+
+    if (operando.valor == '+'){
         resultado = numeroIzq + numeroDer
     }else resultado = numeroIzq - numeroDer
 
@@ -66,12 +53,12 @@ REG_EXPRESION sumar(REG_EXPRESION izquierda, REG_OPERACION operando,REG_EXPRESIO
 }
 
 
-void generar(string string1, string string2, string string3, string string4){
+void generar(String String1, String String2, String String3, String String4){
 
-    fwrite (string1, sizeof(string), 1, archivoMV);
-    fwrite (string2, sizeof(string), 1, archivoMV);
-    fwrite (string3, sizeof(string), 1, archivoMV);
-    fwrite (string4, sizeof(string), 1, archivoMV);
+    fwrite (String1, sizeof(String), 1, archivoMV);
+    fwrite (String2, sizeof(String), 1, archivoMV);
+    fwrite (String3, sizeof(String), 1, archivoMV);
+    fwrite (String4, sizeof(String), 1, archivoMV);
     fwrite ("\n", sizeof(char), 1, archivoMV);
 }
 
@@ -91,19 +78,17 @@ void terminar(){
     fclose(archivoMV);
 }
 
-/* AGREGADO ERCI */
-
 
 void objetivo(void){
 
     programa();
     match(FDT);
-    terminar();     //NUEVO
+    terminar();
 }
 
 void programa(void){
     match(INICIO);
-    comenzar();  //NUEVO
+    comenzar();
     void listaSentencias();
     match(FIN);
 }
@@ -191,13 +176,8 @@ void expresion(REG_EXPRESION *resultado){
     while (tokenActual == SUMA || tokenActual == RESTA){
         operadorAditivo(&op);
         primaria(&operandoDer);
-        //cuando se detecta que el operandoDerecho es primaria, se crea un registro semantico
-        //aca es donde se crean temporales creo?
-
-        //Creo que lo hace genInfijo eso
-
         operandoIzq = genInfijo(operandoIzq, op, operandoDer);
-    proximoToken()
+        proximoToken();
 
     }
 
@@ -218,12 +198,12 @@ void listaExpresiones(){
 REG_EXPRESION genInfijo(REG_EXPRESION e1, REG_OPERACION op, REG_EXPRESION e2){
 
     REG_EXPRESION registro;
-    string opStr;
-    string temp = "temp";
+    String opStr;
+    String temp = "temp";
 
     if(op.valor== '+')strcpy(opStr, "Sumar");
     if(op.valor== '-')strcpy(opStr, "Restar");
-    strcat(temp, cantTemp)
+    strcat(temp, cantTemp);
     generar(opStr, Extraer(&e1), Extraer(&e2),temp);
 
     strcpy(registro.nombre,temp);
@@ -234,9 +214,9 @@ REG_EXPRESION genInfijo(REG_EXPRESION e1, REG_OPERACION op, REG_EXPRESION e2){
 void operadorAditivo(){
     proximoToken();
     if(tokenActual == SUMA || tokenActual == RESTA)
-        match(t);
+        match(tokenActual);
     else
-        errorSintactico(t);
+        errorSintactico(tokenActual);
 }
 
 void Leer(REG_EXPRESION in){
@@ -250,8 +230,8 @@ void Escribir(REG_EXPRESION out){
 REG_EXPRESION procesarCte (void){
     REG_EXPRESION t;
     t.clase = CONSTANTE;
-    scanf(buffer, "%d", &t.valor);
-    return t
+    scanf(buffer, "%d", &t.nombre);
+    return t;
 }
 
 REG_EXPRESION procesarId(void){
@@ -265,9 +245,11 @@ char *extraer(REG_EXPRESION *registro){
     return registro->nombre;
 }
 
+/*
 void terminar(void){
     generar("Detiene", "", "", "");
 }
+*/
 
 void asignar(REG_EXPRESION izquierda, REG_EXPRESION derecha){
     generar("Almacena", extraer(derecha), izquierda.nombre, "");
@@ -278,10 +260,10 @@ void match(TOKEN tokenEsperado){
     proximoToken();
 
     if (tokenEsperado != tokenActual){
-        //flagToken = 0;
+
         errorLexico();
     }
-    //flagToken = 1;
+
 }
 
 void proximoToken(){
@@ -293,13 +275,12 @@ void proximoToken(){
     return;
 }
 
-char buffer[100];
 
 void agregarCaracter(int c, int i){
     buffer[i] = c;
 }
 
-void vaciarBuffer(){  //limpiarBuffer
+void vaciarBuffer(){
     memset(buffer, '\0', sizeof(buffer));
 }
 
@@ -410,29 +391,27 @@ TOKEN scanner()
 }
 
 void inicializarTabla(){
-    memset(ts, 0 ,500)
+    memset(TS, 0 ,500)
  }
 
-void buscar(string nuevoId){
-    for(int i=0,i=<indice, i++){
-        if(ts[indice]==nuevoId){
+void buscar(String nuevoId){
+    for(int j=0,j<=indice, j++){
+        if(TS[indice]==nuevoId){
             return true
         }
     }
     return false;
 }
 
-void colocar(string nuevoId){
-    //if (!buscar(nuevoId)){  -> se hace en chequear
-        ts.t[indice] = ID   //estara bien esto? entendi que pasaba esto en la pagina 40
-        ts.id[indice] = nuevoId;
-        indice++;
-    //}
+void colocar(String nuevoId){
 
+    TS[indice].t = ID;
+    TS[indice].id = nuevoId;
+    indice++;
     return;
 }
 
-void chequear(string s){
+void chequear(String s){
     if(!buscar(s)){
         colocar(s);
         generar("Declara", s, "Entera", "");
@@ -442,13 +421,13 @@ void chequear(string s){
 void errorSintactico(){
     printf("Error sintactico\n");
 
-    fwrite ("Error sintactico\n", sizeof(string), 1, archivoMV);
+    fwrite ("Error sintactico\n", sizeof(String), 1, archivoMV);
 }
 
 void errorLexico(){
     printf("Error Lexico\n");
 
-    fwrite ("Error Lexico\n", sizeof(string), 1, archivoMV);
+    fwrite ("Error Lexico\n", sizeof(String), 1, archivoMV);
 }
 
 int main()
