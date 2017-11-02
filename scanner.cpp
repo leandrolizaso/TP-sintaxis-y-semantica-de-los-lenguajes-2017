@@ -4,17 +4,225 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-
+#include "micro.h"
 
 using namespace std;
 
-typedef enum {
-    INICIO, FIN, LEER, ESCRIBIR, ID, CONSTANTE, PARENIZQUIERDO, PARENDERECHO, PUNTOYCOMA, COMA, ASIGNACION, SUMA, RESTA, FDT
-} TOKEN;
 
+struct REG_OPERACION{
+    int valor;
+} ;
 
+struct REG_EXPRESION{
+    char nombre[32];
+    TOKEN clase;
+};
+
+struct tabla{
+    string id;
+
+};
+
+tabla TS[500];
+int indice = 0;
+bool flagToken = 1;
+TOKEN tokenActual;
 
 FILE *archivo;
+
+
+/* FUNCIONES QUE FALTAN DEFINIR */
+
+void comenzar(void); //aparece en pag 52   que hace? xd
+
+genInfijo(); //pagina 54, esta escrita más abajo pero sin definir
+
+//ESTAS SON PARA LENGUAJE DE MAQUINA
+sumar; //pagina 51
+generar(string, string, string, string); //pag 52. no se qué devuelve
+
+/* ---------------------------  */
+
+
+void objetivo(void){
+    programa();
+    match(FDT);
+}
+
+void programa(void){
+    match(INICIO);
+    void listaSentencias();
+    match(FIN);
+}
+
+void sentencia(TOKEN tok){
+    switch(tok){
+        case ID:
+            match(ID);
+            break;
+        case LEER:
+            match(LEER);
+            match(PARENIZQUIERDO);
+            listaIndentificadores();
+            match(PARENDERECHO);
+            match(PUNTOYCOMA);
+            break;
+        case ESCRIBIR:
+            match(ESCRIBIR);
+            match(PARENIZQUIERDO);
+            listaIdentificadores();
+            match(PARENDERECHO);
+            match(PUNTOYCOMA);
+            break;
+
+        default:
+            errorSintactico(tok);
+            break;
+    }
+}
+
+void listaSentencias(void){
+    proximoToken();
+    while(1){
+        switch(tokenActual){
+            case ID: case LEER: case ESCRIBIR  :
+            sentencia(tokenActual);
+            break;
+            default:
+                return;
+        }
+    }
+}
+
+void identificador(tabla *id){
+    match(ID);
+    *id = procesarId();
+}
+
+void listaIdentificadores(void){
+    REG_EXPRESION registro;
+    identificador(&registro);
+    Leer(registro);
+    proximoToken();
+    while(tokenActual==COMA /*&& tokenActual!= PARENDERECHO*/){
+        identificador(&registro);
+        Leer(registro);
+        proximoToken();
+    }
+}
+
+void primaria(REG_EXPRESION *operando){
+    proximoToken();
+    switch(tokenActual){
+    case ID:
+        match(ID)
+        *operando = tokenActual;
+        break;
+    case CONSTANTE:
+        match(CONSTANTE);
+        *operando = tokenActual;
+        break;
+    case PARENIZQUIERDO:
+        match(PARENIZQUIERDO);
+        expresion(&operando);
+        match(PARENDERECHO);
+        break;
+    }
+}
+
+
+
+void expresion(REG_EXPRESION *resultado){
+    REG_EXPRESION operandoIzq, operandoDer;
+    REG_OPERACION op;
+    TOKEN t;
+    primaria(&operandoIzq);
+    for (t = proximoToken(); t == SUMA || t == RESTA; t = proximoToken()){
+        operadorAditivo(&op);
+        primaria(&operandoDer);
+        operandoIzq = genInfijo(operandoIzq, op, operandoDer);
+    }
+
+    *resultado = operandoIzq;
+}
+
+void listaExpresiones(){
+    REG_EXPRESION registro;
+    expresion(&registro);
+    Escribir(registro);
+    while(tokenActual==COMA /*&& tokenActual!= PARENDERECHO*/){
+        expresion(&registro);
+        Escribir(registro);
+        proximoToken();
+    }
+}
+
+REG_EXPRESION genInfijo(REG_EXPRESION e1, REG_OPERACION op, REG_EXPRESION e2){
+
+}
+
+void operadorAditivo(){
+    TOKEN t = proximoToken();
+    if(t == SUMA || t == RESTA)
+        match(t);
+    else
+        errorSintactico(t);
+}
+
+void Leer(REG_EXPRESION in){
+    generar("Read", in.nombre, "Entera", "");
+}
+
+void Escribir(REG_EXPRESION out){
+    generar("Write", extraer(out), "Entera", "");
+}
+
+REG_EXPRESION procesarCte (void){
+    REG_EXPRESION t;
+    t.clase = CONSTANTE;
+    scanf(buffer, "%d", &t.valor);
+    return t
+}
+
+REG_EXPRESION procesarId(void){
+    REG_EXPRESION t;
+    chequear(buffer);
+    t.clase = ID;
+    strcpy(t.nombre, buffer);
+    return t;
+}
+
+char *extraer(REG_EXPRESION *registro){
+    return registro->nombre;
+}
+
+void terminar(void){
+    generar("Detiene", "", "", "");
+}
+
+void asignar(REG_EXPRESION izquierda, REG_EXPRESION derecha){
+    generar("Almacena", extraer(derecha), izquierda.nombre, "");
+}
+
+
+void match(TOKEN tokenEsperado){
+    proximoToken();
+
+    if (tokenEsperado != tokenActual){
+        //flagToken = 0;
+        errorLexico();
+    }
+    //flagToken = 1;
+}
+
+void proximoToken(){
+        tokenActual = scanner();
+        switch(tokenActual){
+            case ID: colocar(buffer);
+            break;
+        }
+    return;
+}
 
 char buffer[100];
 
@@ -111,6 +319,7 @@ TOKEN scanner()
 
                 } else {
                     printf("Identificador \t   %s \n", buffer);
+                    colocar(buffer);
                     return ID;
                 }
         case 4: ungetc(caracter, archivo);
@@ -130,17 +339,50 @@ TOKEN scanner()
 
 }
 
+void inicializarTabla(){
+    memset(ts, 0 ,500)
+ }
 
+void buscar(string nuevoId){
+    for(int i=0,i=<indice, i++){
+        if(ts[indice]==nuevoId){
+            return true
+        }
+    }
+    return false;
+}
 
+void colocar(string nuevoId){
+    if (!buscar(nuevoId)){
+        ts[indice] = nuevoId;
+        indice++;
+    }
+
+    return;
+}
+
+void chequear(string s){
+    if(!buscar(s)){
+        colocar(S);
+        generar("Declara", s, "Entera", "");
+    }
+}
+
+void errorSintactico(){
+    printf("Error sintactico\n")
+}
+
+void errorLexico(){
+    printf("Error Lexico\n")
+}
 
 int main()
 {
+    inicializarTabla();
+
     archivo = fopen("texto.txt","r");
 
-    while (!feof(archivo)){
-    vaciarBuffer();
-    scanner();
-    }
+    objetivo();
 
     fclose(archivo);
 
