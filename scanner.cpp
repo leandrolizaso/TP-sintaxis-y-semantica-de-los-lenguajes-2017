@@ -1,5 +1,4 @@
 #include <iostream>
-//#include <String.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -21,7 +20,7 @@ FILE *archivoInicial;
 
 FILE *archivoMV;
 
-/* ---------------------------  */
+/* ---------------------------
 
 
 int StringANumero(String numero){
@@ -52,7 +51,7 @@ REG_EXPRESION sumar(REG_EXPRESION izquierda, REG_OPERACION operando,REG_EXPRESIO
     return resultado;
 }
 
-
+*/
 void generar(String String1, String String2, String String3, String String4){
 
     fwrite (String1, sizeof(String), 1, archivoMV);
