@@ -23,7 +23,7 @@ struct tabla{
     String id;
     TOKEN t;  //esto lo vi en el libro
 
-};
+} ;
 
 
 //faltan agregar todos los prototipos xd
@@ -47,6 +47,7 @@ REG_EXPRESION procesarCte (void);
 REG_EXPRESION procesarId(void);
 char *extraer(REG_EXPRESION *registro);
 void asignar(REG_EXPRESION izquierda, REG_EXPRESION derecha);
+void listaIdentificadores();
 
 void proximoToken();
 int StringANumero(String numero);

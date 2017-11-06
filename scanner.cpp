@@ -5,6 +5,10 @@
 #include <string.h>
 #include "micro.h"
 
+//error de tipos
+//errores sintaxics
+
+
 using namespace std;
 
 
@@ -27,7 +31,7 @@ int StringANumero(String numero){
     int numero;
     char str[20];
 
-    strcpy(str, numero);
+    sscanf(str, numero);
     numero = atoi(str);
 
     return numero;
@@ -152,16 +156,16 @@ void primaria(REG_EXPRESION *operando){
     proximoToken();
     switch(tokenActual){
     case ID:
-        match(ID)
-        *operando = tokenActual;
+        match(ID);
+        operando->clase = tokenActual;
         break;
     case CONSTANTE:
         match(CONSTANTE);
-        *operando = tokenActual;
+        operando->clase = tokenActual;
         break;
     case PARENIZQUIERDO:
         match(PARENIZQUIERDO);
-        expresion(&operando);
+        expresion(operando);
         match(PARENDERECHO);
         break;
     }
@@ -198,8 +202,8 @@ REG_EXPRESION genInfijo(REG_EXPRESION e1, REG_OPERACION op, REG_EXPRESION e2){
 
     REG_EXPRESION registro;
     String opStr;
+    //registro debe tener token ID
     String temp = "temp";
-
     if(op.valor== '+')strcpy(opStr, "Sumar");
     if(op.valor== '-')strcpy(opStr, "Restar");
     strcat(temp, cantTemp);
@@ -390,13 +394,13 @@ TOKEN scanner()
 }
 
 void inicializarTabla(){
-    memset(TS, 0 ,500)
+    memset(TS, 0 ,500);
  }
 
-void buscar(String nuevoId){
-    for(int j=0,j<=indice, j++){
-        if(TS[indice]==nuevoId){
-            return true
+bool buscar(String nuevoId){
+    for(int j=0;j<=indice; j++){
+        if(TS[indice].id==nuevoId){
+            return true;
         }
     }
     return false;
@@ -405,7 +409,7 @@ void buscar(String nuevoId){
 void colocar(String nuevoId){
 
     TS[indice].t = ID;
-    TS[indice].id = nuevoId;
+    strcpy(TS[indice].id, nuevoId);
     indice++;
     return;
 }
