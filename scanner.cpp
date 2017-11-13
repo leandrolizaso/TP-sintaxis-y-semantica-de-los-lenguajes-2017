@@ -168,6 +168,8 @@ void primaria(REG_EXPRESION *operando){
         expresion(operando);
         match(PARENDERECHO);
         break;
+    default:
+        break; //para eliminar warning
     }
 }
 
@@ -276,6 +278,8 @@ void proximoToken(){
         switch(tokenActual){
             case ID: colocar(buffer);
             break;
+            default:
+                break; //para eliminar warning
         }
     return;
 }
