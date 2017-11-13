@@ -21,36 +21,25 @@ FILE *archivoInicial;
 FILE *archivoMV;
 
 /* ---------------------------
-
-
 int StringANumero(String numero){
     int numero;
     char str[20];
-
     sscanf(str, numero);
     numero = atoi(str);
-
     return numero;
 }
-
-
 REG_EXPRESION sumar(REG_EXPRESION izquierda, REG_OPERACION operando,REG_EXPRESION derecha){
     //pagina 51 -> explicacion
     REG_EXPRESION resultado;
-
     int numeroIzq;
     int numeroDer;
-
     numeroIzq = StringANumero(extraer(izquierda));
     numeroDer = StringANumero(extraer(derecha));
-
     if (operando.valor == '+'){
         resultado = numeroIzq + numeroDer
     }else resultado = numeroIzq - numeroDer
-
     return resultado;
 }
-
 */
 
 
@@ -292,7 +281,6 @@ void proximoToken(){
                 vaciarBuffer(); //nuevo
                 colocar(buffer);
             break;
-
         default:
             break; //para eliminar warning
         }
@@ -465,4 +453,3 @@ int main()
 
     return 0;
 }
-
