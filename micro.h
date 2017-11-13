@@ -4,7 +4,7 @@
 
 
 typedef enum {
-    INICIO, FIN, LEER, ESCRIBIR, ID, CONSTANTE, PARENIZQUIERDO, PARENDERECHO, PUNTOYCOMA, COMA, ASIGNACION, SUMA, RESTA, FDT
+    INICIO, FIN, LEER, ESCRIBIR, ID, CONSTANTE, PARENIZQUIERDO, PARENDERECHO, PUNTOYCOMA, COMA, ASIGNACION, SUMA, RESTA, FDT, ERRORLEXICO
 } TOKEN;
 
 struct REG_OPERACION{
@@ -34,21 +34,26 @@ void match(TOKEN a);
 void programa(void);
 void listaSentencias(void);
 void sentencia(TOKEN a);
-void listaIndentificadores();
+void listaIdentificadores();
 void identificador(tabla *id);
 void primaria(REG_EXPRESION *operando);
 void expresion(REG_EXPRESION *resultado);
 void listaExpresiones();
 REG_EXPRESION genInfijo(REG_EXPRESION e1, REG_OPERACION op, REG_EXPRESION e2);
-void operadorAditivo();
+void operadorAditivo(REG_OPERACION *op);
 void Leer(REG_EXPRESION in);
-void Escribir(REG_EXPRESION out);
+void Escribir(REG_EXPRESION *o);
 REG_EXPRESION procesarCte (void);
 REG_EXPRESION procesarId(void);
-char *extraer(REG_EXPRESION *registro);
+char *Extraer(REG_EXPRESION *registro);
 void asignar(REG_EXPRESION izquierda, REG_EXPRESION derecha);
 void listaIdentificadores();
-
+void errorSintactico();
+void colocar(String nuevoId);
+void errorLexico();
+TOKEN scanner();
+void  escribir(REG_EXPRESION reg);
+void chequear(String s);
 void proximoToken();
 int StringANumero(String numero);
 REG_EXPRESION sumar(REG_EXPRESION izquierda, REG_OPERACION operando,REG_EXPRESION derecha);

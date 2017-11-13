@@ -104,7 +104,7 @@ void sentencia(TOKEN tok){
         case LEER:
             match(LEER);
             match(PARENIZQUIERDO);
-            listaIndentificadores();
+            listaIdentificadores();
             match(PARENDERECHO);
             match(PUNTOYCOMA);
             break;
@@ -117,7 +117,7 @@ void sentencia(TOKEN tok){
             break;
 
         default:
-            errorSintactico(tok);
+            errorSintactico();
             break;
     }
 }
@@ -135,7 +135,7 @@ void listaSentencias(void){
     }
 }
 
-void identificador(tabla *id){
+void identificador(REG_EXPRESION *id){
     match(ID);
     *id = procesarId();
 }
@@ -190,10 +190,10 @@ void expresion(REG_EXPRESION *resultado){
 void listaExpresiones(){
     REG_EXPRESION registro;
     expresion(&registro);
-    escribir(registro);
+    Escribir(&registro);
     while(tokenActual==COMA /*&& tokenActual!= PARENDERECHO*/){
         expresion(&registro);
-        escribir(registro);
+        Escribir(&registro);
         proximoToken();
     }
 }
@@ -203,10 +203,10 @@ REG_EXPRESION genInfijo(REG_EXPRESION e1, REG_OPERACION op, REG_EXPRESION e2){
     REG_EXPRESION registro;
     String opStr;
     //registro debe tener token ID
-    String temp = "temp";
+    String temp;
     if(op.valor== '+')strcpy(opStr, "Sumar");
     if(op.valor== '-')strcpy(opStr, "Restar");
-    strcat(temp, cantTemp);
+    sscanf(temp,"%s%d","Temp&",&cantTemp);
     generar(opStr, Extraer(&e1), Extraer(&e2),temp);
 
     strcpy(registro.nombre,temp);
@@ -214,20 +214,19 @@ REG_EXPRESION genInfijo(REG_EXPRESION e1, REG_OPERACION op, REG_EXPRESION e2){
     return registro;
 }
 
-void operadorAditivo(){
-    proximoToken();
-    if(tokenActual == SUMA || tokenActual == RESTA)
+void operadorAditivo(REG_OPERACION *op){
+    if(op->valor == '+' || op->valor == '-')
         match(tokenActual);
     else
-        errorSintactico(tokenActual);
+        errorSintactico();
 }
 
 void Leer(REG_EXPRESION in){
     generar("Read", in.nombre, "Entera", "");
 }
 
-void Escribir(REG_EXPRESION out){
-    generar("Write", extraer(out), "Entera", "");
+void Escribir(REG_EXPRESION *out){
+    generar("Write", Extraer(out), "Entera", "");
 }
 
 REG_EXPRESION procesarCte (void){
@@ -241,10 +240,13 @@ REG_EXPRESION procesarId(void){
     REG_EXPRESION t;
     t.clase = ID;
     strcpy(t.nombre, buffer);
+    generar("Declara", Extraer(&t), "Entera", "");
     return t;
 }
 
-char *extraer(REG_EXPRESION *registro){
+
+
+char *Extraer(REG_EXPRESION *registro){
     return registro->nombre;
 }
 
@@ -254,8 +256,8 @@ void terminar(void){
 }
 */
 
-void asignar(REG_EXPRESION izquierda, REG_EXPRESION derecha){
-    generar("Almacena", extraer(derecha), izquierda.nombre, "");
+void asignar(REG_EXPRESION izquierda, REG_EXPRESION *derecha){
+    generar("Almacena", Extraer(derecha), izquierda.nombre, "");
 }
 
 
@@ -321,8 +323,8 @@ bool esReservada(char palabra[]){
     return !strcmp(palabra, "inicio") || !strcmp(palabra, "fin") || !strcmp(palabra, "leer") || !strcmp(palabra, "escribir") ;
 }
 
-TOKEN scanner()
-{
+
+TOKEN scanner(void) {
     static int mat[15][13] = {{1,3,5,6,7,8,9,10,11,14,13,0,14}, //Estado 0
                             {1,1,2,2,2,2,2,2,2,2,2,2,2}, //Estado 1
                             {99,99,99,99,99,99,99,99,99,99,99,99,99}, //Estado 2
@@ -340,58 +342,54 @@ TOKEN scanner()
                             {99,99,99,99,99,99,99,99,99,99,99,99,99} //Estado 14
                             };
 
-    int i=0;
-    int estado=0;
+
+    vaciarBuffer();
+    int estado = 0, i=0;
     char caracter;
-
-
-    while (!feof(archivoInicial) && estado!=14 && estado!=99 && !esEstadoFinal(estado))
-    {
-        caracter = getc(archivoInicial);
-        int col;
-        col = columna(caracter);
+    while (!feof(archivoInicial)) {
+        caracter = fgetc(archivoInicial);
+        int col = columna(caracter);
         estado = mat[estado][col];
-        if (estado != 2 && estado != 4 && caracter!='\n'){
-            agregarCaracter(caracter, i);
-            i++;
+        switch (estado) {
+            case 1: agregarCaracter(caracter,i);
+                    i++;
+                    break;
+            case 2: ungetc(caracter,archivoInicial);
+                    if(esReservada(buffer)){
+                        printf("Reservada \t   %s \n", buffer);
+                        if(!strcmp(buffer, "inicio")) return INICIO;
+                        if(!strcmp(buffer, "fin")) return FIN;
+                        if(!strcmp(buffer, "leer")) return LEER;
+                        if(!strcmp(buffer, "escribir")) return ESCRIBIR;
+                        printf("Re \t   %s \n", buffer);
+                    } else {
+                            printf("Identificador \t   %s \n", buffer);
+                            chequear(buffer);
+                            return ID;
+                            }
+            case 3: agregarCaracter(caracter,i);
+                    i++;
+                    break;
+            case 4: ungetc(caracter,archivoInicial);
+                    printf("Cte \t   %s \n", buffer);
+                    return CONSTANTE;
+            case 5: return SUMA;
+            case 6: return RESTA;
+            case 7: return PARENIZQUIERDO;
+            case 8: return PARENDERECHO;
+            case 9: return COMA;
+            case 10: return PUNTOYCOMA;
+            case 12: return ASIGNACION;
+            case 14: errorLexico();return ERRORLEXICO;
+
         }
 
     }
-
-    switch(estado){
-
-        case 2: ungetc(caracter, archivoInicial);
-                if(esReservada(buffer)){
-                    printf("Palabra reservada \t   %s \n", buffer);
-
-                    if(strcmp(buffer, "inicio")) return INICIO;
-                    if(strcmp(buffer, "fin")) return FIN;
-                    if(strcmp(buffer, "leer")) return LEER;
-                    if(strcmp(buffer, "escribir")) return ESCRIBIR;
-
-
-                } else {
-                    printf("Identificador \t   %s \n", buffer);
-                    colocar(buffer);
-                    chequear(buffer;
-                    return ID;
-                }
-        case 4: ungetc(caracter, archivoInicial);
-                printf("Constante \t   %s \n", buffer); return CONSTANTE;
-        case 5: printf("operador \t   %s \n", buffer); return SUMA;
-        case 6: printf("Operador \t   %s \n", buffer); return RESTA;
-        case 7: printf("Parentesis \t   %s \n", buffer); return PARENIZQUIERDO;
-        case 8: printf("Parentesis \t   %s \n", buffer); return PARENDERECHO;
-        case 9: printf("Caracter de puntuacion \t   %s \n", buffer); return COMA;
-        case 10: printf("Caracter de puntuacion \t   %s \n", buffer); return PUNTOYCOMA;
-        case 12: printf("Operador \t   %s \n", buffer); return ASIGNACION;
-        case 13: return FDT;
-        case 14: printf("Error Lexico\n");
-
-    }
-
-
+    if (feof(archivoInicial)) return FDT;
 }
+
+
+
 
 void inicializarTabla(){
     memset(TS, 0 ,500);
@@ -399,7 +397,7 @@ void inicializarTabla(){
 
 bool buscar(String nuevoId){
     for(int j=0;j<=indice; j++){
-        if(TS[indice].id==nuevoId){
+        if(!strcmp(TS[j].id,nuevoId)){
             return true;
         }
     }
@@ -433,15 +431,18 @@ void errorLexico(){
     fwrite ("Error Lexico\n", sizeof(String), 1, archivoMV);
 }
 
+
 int main()
 {
     inicializarTabla();
 
     archivoInicial = fopen("texto.txt","r");
+    printf("iniciando analisis sintactico\n");
 
     objetivo();
-
+    printf("analisis completo");
     fclose(archivoInicial);
 
     return 0;
 }
+
