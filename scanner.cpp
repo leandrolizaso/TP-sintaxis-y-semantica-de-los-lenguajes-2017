@@ -8,17 +8,13 @@
 //error de tipos
 //errores sintaxics
 
-
 using namespace std;
-
-
 
 tabla TS[500];
 int indice = 0;
 int cantTemp = 1;
 TOKEN tokenActual;
 char buffer[100];
-
 
 FILE *archivoInicial;
 
@@ -56,6 +52,8 @@ REG_EXPRESION sumar(REG_EXPRESION izquierda, REG_OPERACION operando,REG_EXPRESIO
 }
 
 */
+
+
 void generar(String String1, String String2, String String3, String String4){
 
     fwrite (String1, sizeof(String), 1, archivoMV);
@@ -70,7 +68,6 @@ void comenzar(){
 
     archivoMV = fopen("textoFinal.txt","w");
 
-    fwrite ("INICIO",1, sizeof("INICIO"), archivoMV);
 }
 
 
@@ -83,16 +80,23 @@ void terminar(){
 
 
 void objetivo(void){
-
+    puts("entro a objetivo");
     programa();
     match(FDT);
     terminar();
 }
 
 void programa(void){
+    puts ("va a matchear inicio");
+
     match(INICIO);
+
     comenzar();
+    fwrite ("INICIO\n",1, sizeof("INICIO\n"), archivoMV);
+
+    puts("va a meterse en lista sentencias");
     void listaSentencias();
+
     match(FIN);
 }
 
@@ -123,10 +127,17 @@ void sentencia(TOKEN tok){
 }
 
 void listaSentencias(void){
+
+    puts("entro a listaSentencias");
     proximoToken();
+    puts("busco proximo token");
     while(1){
+
+        puts("se metio al while de listaSentencias");
         switch(tokenActual){
             case ID: case LEER: case ESCRIBIR  :
+
+            puts("va a ir a sentencia de LEER ");
             sentencia(tokenActual);
             break;
             default:
@@ -267,20 +278,25 @@ void match(TOKEN tokenEsperado){
     proximoToken();
 
     if (tokenEsperado != tokenActual){
-
-        errorLexico();
+        errorLexico();  //no es error sintactico?
     }
+
 
 }
 
 void proximoToken(){
         tokenActual = scanner();
-        switch(tokenActual){
-            case ID: colocar(buffer);
+
+        /*switch(tokenActual){
+            case ID:
+                vaciarBuffer(); //nuevo
+                colocar(buffer);
             break;
-            default:
-                break; //para eliminar warning
+
+        default:
+            break; //para eliminar warning
         }
+        */
     return;
 }
 
@@ -449,4 +465,5 @@ int main()
 
     return 0;
 }
+
 
