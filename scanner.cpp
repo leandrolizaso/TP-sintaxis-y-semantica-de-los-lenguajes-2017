@@ -245,7 +245,7 @@ void Escribir(REG_EXPRESION *out){
 REG_EXPRESION procesarCte (void){
     REG_EXPRESION t;
     t.clase = CONSTANTE;
-    scanf(buffer, "%d", &t.nombre);
+    sscanf(buffer, "%d", &t.nombre);
     return t;
 }
 
@@ -465,5 +465,4 @@ int main()
 
     return 0;
 }
-
 
