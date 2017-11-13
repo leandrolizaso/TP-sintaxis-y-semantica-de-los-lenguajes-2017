@@ -58,5 +58,6 @@ void proximoToken();
 int StringANumero(String numero);
 REG_EXPRESION sumar(REG_EXPRESION izquierda, REG_OPERACION operando,REG_EXPRESION derecha);
 void generar(String String1, String String2, String String3, String String4);
+void vaciarBuffer();
 
 #endif // MICRO_H_INCLUDED
