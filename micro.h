@@ -8,16 +8,14 @@ typedef enum {
  PARENDERECHO, PUNTOYCOMA, COMA, ASIGNACION, SUMA, RESTA, FDT, ERRORLEXICO
 } TOKEN;
 
-
+typedef char String[32];
 typedef TOKEN REG_OPERACION;
 
 struct REG_EXPRESION {
     int valor;
-    char nombre[32+1];
+    String nombre;
     TOKEN clase;
 };
-
-typedef char String[32];
 
 
 struct tabla{
@@ -50,7 +48,7 @@ void Asignar(REG_EXPRESION,REG_EXPRESION);
 char* Extraer(REG_EXPRESION);
 REG_EXPRESION GenInfijo(REG_EXPRESION,REG_OPERACION,REG_EXPRESION);
 void Escribir(REG_EXPRESION);
-
+void imprimirTS();
 
 
 #endif // MICRO_H_INCLUDED

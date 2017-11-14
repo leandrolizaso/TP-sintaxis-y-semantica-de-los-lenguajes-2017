@@ -1,1 +1,5 @@
-inicio B:=34; A:=36 + B; fin
+inicio
+   leer (A);
+   A := B + (C + D + (30 + A));
+   escribir(A+17) ;
+fin

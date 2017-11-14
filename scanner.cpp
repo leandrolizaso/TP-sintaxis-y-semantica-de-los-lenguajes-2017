@@ -11,16 +11,20 @@ char buffer[1024];
 
 TOKEN tokenActual;
 FILE * fuente;
+FILE * archivoFinal;
 
 
-int tmp=0;
+
+int contadorTemporales=0;
 
 
 int main(int argc, char* argv[]) {
     fuente = fopen("test.txt","r");
     Objetivo();
     fclose(fuente);
-    getchar();
+    //imprimirTS();
+
+
 
 }
 
@@ -31,6 +35,11 @@ void match(TOKEN t) {
         tokenActual = scanner();
 }
 
+void imprimirTS(){
+    for(int j=0; j<indice; j++){
+        printf("Identificador \t   %s \n", TS[j].id);
+    }
+}
 
 int columna(int a) {
     if (isalpha(a)) return 0;
@@ -93,14 +102,14 @@ TOKEN scanner(void) {
                     break;
             case 2: ungetc(caracter,fuente);
                     if(esReservada(buffer)){
-                        printf("Reservada \t   %s \n", buffer);
+                       // printf("Reservada \t   %s \n", buffer);
                         if(!strcmp(buffer, "inicio")) return INICIO;
                         if(!strcmp(buffer, "fin")) return FIN;
                         if(!strcmp(buffer, "leer")) return LEER;
                         if(!strcmp(buffer, "escribir")) return ESCRIBIR;
                         printf("Re \t   %s \n", buffer);
                     } else {
-                            printf("Identificador \t   %s \n", buffer);
+                           // printf("Identificador \t   %s \n", buffer);
                             chequear(buffer);
                             return ID;
                             }
@@ -108,7 +117,7 @@ TOKEN scanner(void) {
                     i++;
                     break;
             case 4: ungetc(caracter,fuente);
-                    printf("Constante \t   %s \n", buffer);
+                    //printf("Constante \t   %s \n", buffer);
                     return CONSTANTE;
             case 5: return SUMA;
             case 6: return RESTA;
@@ -126,6 +135,7 @@ TOKEN scanner(void) {
 }
 
 void Objetivo(void) {
+    archivoFinal = fopen("textoFinal.txt","w");
     tokenActual = scanner();
     Programa();
     match(FDT);
@@ -226,11 +236,13 @@ void OperadorAditivo(REG_OPERACION &op) {
 
 void ErrorSintactico() {
     printf("Error sintactico\n");
+    fprintf(archivoFinal, "Error sintactico\n");
 
 }
 
 void ErrorLexico(void) {
     printf("Error lexico\n");
+    fprintf(archivoFinal, "Error lexico\n");
 }
 
 REG_EXPRESION Identificador(void) {
@@ -279,6 +291,7 @@ void Terminar(void) {
 
 void Generar(String string1,String string2,String string3,String string4) {
     printf("%s %s %s %s\n",string1,string2,string3,string4);
+    fprintf(archivoFinal, "%s %s %s %s\n",string1,string2,string3,string4);
 }
 
 REG_EXPRESION ProcesarID(void) {
@@ -340,33 +353,33 @@ char* Extraer(REG_EXPRESION t){
     return auxstr;
 }
 
-REG_EXPRESION GenInfijo(REG_EXPRESION e1,REG_OPERACION op,REG_EXPRESION e2){
-    tmp++;
-    String tmpstring;
-    sprintf(tmpstring,"Temp&%d",tmp);
-    chequear(tmpstring);
+REG_EXPRESION GenInfijo(REG_EXPRESION exp1,REG_OPERACION operador,REG_EXPRESION exp2){
+    contadorTemporales++;
+    String stringTemporal;
+    sprintf(stringTemporal,"Temp&%d",contadorTemporales);
+    chequear(stringTemporal);
     String auxstr;
-    if (e1.clase == CONSTANTE) {
-        sprintf(auxstr, "%d", e1.valor);
+    if (exp1.clase == CONSTANTE) {
+        sprintf(auxstr, "%d", exp1.valor);
     } else{
-        strcpy(auxstr,e1.nombre);
+        strcpy(auxstr,exp1.nombre);
     }
     String auxstr2;
-    if (e2.clase == CONSTANTE) {
-        sprintf(auxstr2, "%d", e2.valor);
+    if (exp2.clase == CONSTANTE) {
+        sprintf(auxstr2, "%d", exp2.valor);
     } else{
-        strcpy(auxstr2,e2.nombre);
+        strcpy(auxstr2,exp2.nombre);
     }
-    if (op==SUMA){
-        Generar("Suma",auxstr,auxstr2,tmpstring);
+    if (operador==SUMA){
+        Generar("Suma",auxstr,auxstr2,stringTemporal);
     }
     else{
-        Generar("Resta",auxstr,auxstr2,tmpstring);
+        Generar("Resta",auxstr,auxstr2,stringTemporal);
     }
-    REG_EXPRESION t;
-    t.clase = ID;
-    strcpy(t.nombre,tmpstring);
-    return t;
+    REG_EXPRESION temporal;
+    temporal.clase = ID;
+    strcpy(temporal.nombre,stringTemporal);
+    return temporal;
 }
 
 void Escribir(REG_EXPRESION out){
